@@ -150,6 +150,7 @@ class PostInstallRemoveLiveConfig(PostInstallStep):
         return "Removing live configuration"
 
     def apply(self):
+        print("Removing live user")
         # Forcibly remove the user (TODO: Make all this configurable... )
         if not self.run_in_chroot("userdel -fr live"):
             return False
@@ -161,6 +162,7 @@ class PostInstallRemoveLiveConfig(PostInstallStep):
         if self.info.strategy.is_uefi():
             packages.extend(["grub", "os-prober"])
 
+        print("Removing live packages")
         # Return live-specific packages
         cmd_remove = "eopkg rmf {} -y".format(
             " ".join(packages))
