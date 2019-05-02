@@ -150,7 +150,6 @@ class PostInstallRemoveLiveConfig(PostInstallStep):
         return "Removing live configuration"
 
     def apply(self):
-        print("Removing live user")
         # Forcibly remove the user (TODO: Make all this configurable... )
         if not self.run_in_chroot("userdel -fr live"):
             return False
@@ -162,7 +161,6 @@ class PostInstallRemoveLiveConfig(PostInstallStep):
         if self.info.strategy.is_uefi():
             packages.extend(["grub", "os-prober"])
 
-        print("Removing live packages")
         # Return live-specific packages
         cmd_remove = "eopkg rmf {} -y".format(
             " ".join(packages))
@@ -641,7 +639,10 @@ class PostInstallFstab(PostInstallStep):
         root_fs = strat.root_fstype
         appends.append("# {} at time of installation".format(root))
 
-        appends.append("UUID={}\t/\t{}\t{}\t0\t1".format(uuid, root_fs, ext4_ops))
+        if root_fs == "ext4":
+            appends.append("UUID={}\t/\t{}\t{}\t0\t1".format(uuid, root_fs, ext4_ops))
+        elif root_fs == "f2fs":
+            appends.append("UUID={}\t/\t{}\t{}\t0\t1".format(uuid, root_fs, f2fs_ops))
 
         fp = os.path.join(self.installer.get_installer_target_filesystem(),
                           "etc/fstab")
